@@ -1,0 +1,65 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configuration Liberty Rider",
+                "description": "Entrez vos informations de connexion",
+                "data": {
+                    "username": "Nom d'utilisateur",
+                    "password": "Mot de passe",
+                    "language": "Langue",
+                    "scan_interval": "Intervalle d'actualisation (minutes)"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Impossible de se connecter",
+            "invalid_auth": "Authentification invalide",
+            "unknown": "Erreur inattendue",
+            "invalid_url": "URL invalide",
+            "invalid_url_format": "Format d'URL invalide"
+        },
+        "abort": {
+            "already_configured": "Cette intégration est déjà configurée"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Options Liberty Rider",
+                "description": "Configurez vos préférences",
+                "data": {
+                    "language": "Langue",
+                    "scan_interval": "Intervalle d'actualisation (minutes)"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "status": {
+                "name": "État du trajet",
+                "state": {
+                    "ride_stopped": "Trajet terminé",
+                    "ride_active": "Trajet en cours",
+                    "ride_paused": "Trajet en pause"
+                }
+            },
+            "battery": {
+                "name": "Niveau de batterie"
+            },
+            "distance": {
+                "name": "Distance parcourue"
+            },
+            "duration": {
+                "name": "Temps total"
+            },
+            "pause_duration": {
+                "name": "Temps de pause"
+            },
+            "start_time": {
+                "name": "Heure de départ"
+            }
+        }
+    }
+} 
