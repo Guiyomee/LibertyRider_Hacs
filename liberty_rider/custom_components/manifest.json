@@ -1,9 +1,10 @@
 {
   "domain": "liberty_rider",
   "name": "Liberty Rider",
-  "documentation": "https://github.com/yourusername/liberty_rider",
+  "content_in_root": false,
+  "documentation": "https://github.com/Guiyomee/LibertyRider_Hacs",
   "dependencies": [],
-  "codeowners": ["@yourusername"],
+  "codeowners": ["@Guiyomee"],
   "requirements": ["aiohttp", "beautifulsoup4"],
   "version": "1.0.0",
   "config_flow": true,
