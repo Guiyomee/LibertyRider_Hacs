@@ -1,7 +1,6 @@
 {
   "domain": "liberty_rider",
   "name": "Liberty Rider",
-  "content_in_root": false,
   "documentation": "https://github.com/Guiyomee/LibertyRider_Hacs",
   "dependencies": [],
   "codeowners": ["@Guiyomee"],
@@ -9,5 +8,6 @@
   "version": "1.0.0",
   "config_flow": true,
   "iot_class": "cloud_polling",
-  "translations": ["fr", "en"]
+  "translations": ["fr", "en"],
+  "favicon": "logo.png"
 } 

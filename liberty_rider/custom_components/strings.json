@@ -1,0 +1,65 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Liberty Rider Configuration",
+                "description": "Enter your connection information",
+                "data": {
+                    "username": "Username",
+                    "password": "Password",
+                    "language": "Language",
+                    "scan_interval": "Update interval (minutes)"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Cannot connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error",
+            "invalid_url": "Invalid URL",
+            "invalid_url_format": "Invalid URL format"
+        },
+        "abort": {
+            "already_configured": "This integration is already configured"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Liberty Rider Options",
+                "description": "Configure your preferences",
+                "data": {
+                    "language": "Language",
+                    "scan_interval": "Update interval (minutes)"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "status": {
+                "name": "Ride Status",
+                "state": {
+                    "ride_stopped": "Ride finished",
+                    "ride_active": "Ride in progress",
+                    "ride_paused": "Ride paused"
+                }
+            },
+            "battery": {
+                "name": "Battery Level"
+            },
+            "distance": {
+                "name": "Distance"
+            },
+            "duration": {
+                "name": "Total Time"
+            },
+            "pause_duration": {
+                "name": "Pause Time"
+            },
+            "start_time": {
+                "name": "Start Time"
+            }
+        }
+    }
+}

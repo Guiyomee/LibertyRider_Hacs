@@ -7,6 +7,8 @@ import aiohttp
 import async_timeout
 import re
 from urllib.parse import urlparse, parse_qs
+import json
+import os
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -31,9 +33,34 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.translation import async_get_translations
 
-from .const import DOMAIN, API_URL, CONF_SHARE_URL, BASE_URL, DEFAULT_SCAN_INTERVAL
+from .const import DOMAIN, API_URL, CONF_SHARE_URL, BASE_URL, DEFAULT_SCAN_INTERVAL, CONF_LANGUAGE, DEFAULT_LANGUAGE
 
 _LOGGER = logging.getLogger(__name__)
+
+def get_translation(language: str, key: str) -> str:
+    """Get translation for a key in the specified language."""
+    try:
+        # Construire le chemin vers le fichier de traduction
+        translation_file = os.path.join(
+            os.path.dirname(__file__),
+            "translations",
+            f"{language}.json"
+        )
+        
+        # Lire le fichier de traduction
+        with open(translation_file, 'r', encoding='utf-8') as f:
+            translations = json.load(f)
+        
+        # Extraire la valeur en suivant la structure de la clé
+        keys = key.split('.')
+        value = translations
+        for k in keys:
+            value = value.get(k, {})
+        
+        return value if isinstance(value, str) else key
+    except Exception as err:
+        _LOGGER.error("Error loading translation for %s: %s", key, err)
+        return key
 
 SENSOR_TYPES = {
     "status": SensorEntityDescription(
@@ -88,15 +115,8 @@ async def async_setup_entry(
     except Exception as err:
         raise ConfigEntryNotReady(f"Error initializing Liberty Rider coordinator: {err}")
 
-    entities = []
-    
-    # Ajouter tous les capteurs sauf la position
-    for description in SENSOR_TYPES.values():
-        entities.append(LibertyRiderSensor(coordinator, description))
-    
-    # Ajouter le tracker GPS
+    entities = [LibertyRiderSensor(coordinator, description) for description in SENSOR_TYPES.values()]
     entities.append(LibertyRiderGPSTracker(coordinator))
-    
     async_add_entities(entities)
 
 class LibertyRiderCoordinator(DataUpdateCoordinator):
@@ -203,9 +223,15 @@ class LibertyRiderSensor(SensorEntity):
             user = coordinator.data["user"]
             user_firstname = user.get('firstName', '')
         
+        # Obtenir la langue configurée
+        language = coordinator.config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+        
         # Créer l'ID unique avec le prénom
-        self._attr_unique_id = f"liberty_rider_{description.key}_{user_firstname}"
-        self._attr_name = f"Liberty Rider {description.name} - {user_firstname}"
+        self._attr_unique_id = f"liberty_rider_{self.entity_description.key}_{user_firstname}"
+        
+        # Traduire le nom de l'entité
+        translated_name = get_translation(language, self.entity_description.name)
+        self._attr_name = f"{translated_name} - {user_firstname}"
 
     @property
     def available(self) -> bool:
@@ -239,7 +265,10 @@ class LibertyRiderSensor(SensorEntity):
                 state = data.get("state")
                 if state is None:
                     return None
-                return f"entity.sensor.status.state.{state.lower()}"
+                # Obtenir la langue configurée
+                language = self.coordinator.config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+                # Traduire l'état
+                return get_translation(language, f"entity.sensor.status.state.{state.lower()}")
                 
             elif self.entity_description.key == "battery":
                 battery_level = data.get("currentBatteryLevel")
@@ -292,9 +321,15 @@ class LibertyRiderGPSTracker(TrackerEntity):
             user = coordinator.data["user"]
             user_firstname = user.get('firstName', '')
         
+        # Obtenir la langue configurée
+        language = coordinator.config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+        
         # Créer l'ID unique avec le prénom
         self._attr_unique_id = f"liberty_rider_{user_firstname}_gps"
-        self._attr_name = f"Liberty Rider GPS - {user_firstname}"
+        
+        # Traduire le nom de l'entité
+        translated_name = get_translation(language, "entity.sensor.status.name")
+        self._attr_name = f"{translated_name} - {user_firstname}"
         self._attr_icon = "mdi:map-marker"
 
     @property
@@ -329,7 +364,10 @@ class LibertyRiderGPSTracker(TrackerEntity):
             
         state = self.coordinator.data.get("state")
         if state:
-            return f"entity.sensor.status.state.{state.lower()}"
+            # Obtenir la langue configurée
+            language = self.coordinator.config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+            # Traduire l'état
+            return get_translation(language, f"entity.sensor.status.state.{state.lower()}")
         return STATE_NOT_HOME
 
     @property
@@ -422,9 +460,15 @@ class LibertyRiderGPSTracker(TrackerEntity):
             if data.get("duration"):
                 attributes["duration_minutes"] = round(data["duration"] / 60, 1)
             
-            if data.get("currentBatteryLevel"):
-                attributes["battery_level"] = round(data["currentBatteryLevel"] * 100, 1)
-            
+            battery_raw = data.get("currentBatteryLevel")
+            if battery_raw is not None:
+                try:
+                    battery_pct = round(float(battery_raw) * 100, 1)
+                except (ValueError, TypeError):
+                    battery_pct = None
+                if battery_pct is not None:
+                    attributes["battery_level"] = battery_pct
+                
             return attributes
             
         except Exception as err:
